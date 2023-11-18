@@ -7,15 +7,18 @@ from torchvision import transforms
 from cityscapesscripts.helpers.labels import trainId2label as t2l
 
 if torch.cuda.is_available():
-    device = 'cuda:0'
+    DEVICE = 'cuda:0'
     print('Running on the GPU')
+elif torch.backends.mps.is_available():
+    DEVICE = "mps"
+    print('Running on the MPS')
 else:
-    device = 'cpu'
+    DEVICE = "cpu"
     print('Running on the CPU')
 
-ROOT_DIR_CITYSCAPES = 'datasets/cityscapes'
-IMAGE_HEIGHT = 300
-IMAGE_WIDTH = 600
+ROOT_DIR = '../datasets/superMario'
+IMG_HEIGHT = 240
+IMG_WIDTH = 272
 
 MODEL_PATH = "YOUR-MODEL-PATH-WHICH-NEEDS-TO-BE-EVALUATED"
 

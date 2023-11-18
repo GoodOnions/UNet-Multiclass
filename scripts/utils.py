@@ -1,16 +1,14 @@
 import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets, utils, transforms
-from datasets import CityscapesDataset
+from datasets import SuperMarioDataset
 from PIL import Image
 from tqdm import tqdm
 import numpy as np
 
-def get_cityscapes_data(
-    mode,
+def get_supermario_data(
     split,
-    relabelled,
-    root_dir='datasets/cityscapes',
+    root_dir='datasets/superMario',
     target_type="semantic",
     transforms=None,
     batch_size=1,
@@ -19,8 +17,8 @@ def get_cityscapes_data(
     pin_memory=True,
 
 ):
-    data = CityscapesDataset(
-        mode=mode, split=split, target_type=target_type, relabelled=relabelled, transform=transforms, root_dir=root_dir, eval=eval)
+    data = SuperMarioDataset(
+        split=split, target_type=target_type, transform=transforms, root_dir=root_dir, eval=eval)
 
     data_loaded = torch.utils.data.DataLoader(
         data, batch_size=batch_size, shuffle=shuffle, pin_memory=pin_memory)
