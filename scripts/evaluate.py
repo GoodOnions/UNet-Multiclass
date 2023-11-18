@@ -20,18 +20,18 @@ ROOT_DIR = '../datasets/superMario'
 IMG_HEIGHT = 240
 IMG_WIDTH = 272
 
-MODEL_PATH = "YOUR-MODEL-PATH-WHICH-NEEDS-TO-BE-EVALUATED"
+MODEL_PATH = "../models/dummy_train.pth"
 
-EVAL = False 
-PLOT_LOSS = False
+EVAL = True
+PLOT_LOSS = True
 
 def save_predictions(data, model):    
     model.eval()
     with torch.no_grad():
         for idx, batch in enumerate(tqdm(data)):
 
-            X, y, s = batch # here 's' is the name of the file stored in the root directory
-            X, y = X.to(device), y.to(device)
+            X, y = batch # here 's' is the name of the file stored in the root directory
+            X, y = X.to(DEVICE), y.to(DEVICE)
             predictions = model(X) 
             
             predictions = torch.nn.functional.softmax(predictions, dim=1)
@@ -40,31 +40,24 @@ def save_predictions(data, model):
 
             # Remapping the labels
             pred_labels = pred_labels.to('cpu')
-            pred_labels.apply_(lambda x: t2l[x].id)
-            pred_labels = pred_labels.to(device)   
+            #pred_labels.apply_(lambda x: t2l[x].id)
+            pred_labels = pred_labels.to(DEVICE)
 
             # Resizing predicted images too original size
-            pred_labels = transforms.Resize((1024, 2048))(pred_labels)             
+            #pred_labels = transforms.Resize((1024, 2048))(pred_labels)
 
-            # Configure filename & location to save predictions as images
-            s = str(s)
-            pos = s.rfind('/', 0, len(s))
-            name = s[pos+1:-18]  
-            global location
-            location = 'saved_images\multiclass_1'
 
-            utils.save_as_images(pred_labels, location, name, multiclass=True)                
+
+            utils.save_as_images(pred_labels, '../predictions',str(idx), multiclass=True)
 
 def evaluate(path):
     T = transforms.Compose([
-        transforms.Resize((IMAGE_HEIGHT, IMAGE_WIDTH), interpolation=Image.NEAREST)
+        transforms.Resize((IMG_HEIGHT, IMG_WIDTH), interpolation=Image.NEAREST)
     ])
 
-    val_set = get_cityscapes_data(
-        root_dir=ROOT_DIR_CITYSCAPES,
+    val_set = get_supermario_data(
+        root_dir=ROOT_DIR,
         split='val',
-        mode='fine',
-        relabelled=True,
         transforms=T,
         shuffle=True,
         eval=True
@@ -72,7 +65,7 @@ def evaluate(path):
  
     print('Data has been loaded!')
 
-    net = UNET(in_channels=3, classes=19).to(device)
+    net = UNET(in_channels=3, classes=6).to(DEVICE)
     checkpoint = torch.load(path)
     net.load_state_dict(checkpoint['model_state_dict'])
     net.eval()

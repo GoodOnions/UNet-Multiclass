@@ -25,7 +25,7 @@ IMG_WIDTH = 272
 
 BATCH_SIZE = 16 
 LEARNING_RATE = 0.0005
-EPOCHS = 1
+EPOCHS = 5
 
 def train_function(data, model, optimizer, loss_fn, device):
     print('Entering into train function')
