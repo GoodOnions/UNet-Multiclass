@@ -4,7 +4,7 @@ from utils import *
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from torchvision import transforms
-from cityscapesscripts.helpers.labels import trainId2label as t2l
+
 
 if torch.cuda.is_available():
     DEVICE = 'cuda:0'
@@ -30,10 +30,11 @@ def save_predictions(data, model):
     with torch.no_grad():
         for idx, batch in enumerate(tqdm(data)):
 
-            X, y = batch # here 's' is the name of the file stored in the root directory
+            X, y, s = batch # here 's' is the name of the file stored in the root directory
             X, y = X.to(DEVICE), y.to(DEVICE)
-            predictions = model(X) 
-            
+            prediction = model(X)
+
+            '''
             predictions = torch.nn.functional.softmax(predictions, dim=1)
             pred_labels = torch.argmax(predictions, dim=1) 
             pred_labels = pred_labels.float()
@@ -41,14 +42,19 @@ def save_predictions(data, model):
             # Remapping the labels
             pred_labels = pred_labels.to('cpu')
             #pred_labels.apply_(lambda x: t2l[x].id)
+            )
             pred_labels = pred_labels.to(DEVICE)
 
             # Resizing predicted images too original size
             #pred_labels = transforms.Resize((1024, 2048))(pred_labels)
-
-
-
             utils.save_as_images(pred_labels, '../predictions',str(idx), multiclass=True)
+            '''
+            prediction = torch.argmax(prediction, dim=1).squeeze()
+            prediction = prediction.float().detach().cpu().numpy()
+            segm_rgb = decode_segmap(prediction)
+            #plt.savefig('../predictions/test.png', format='png', dpi=300, bbox_inches="tight")
+
+
 
 def evaluate(path):
     T = transforms.Compose([

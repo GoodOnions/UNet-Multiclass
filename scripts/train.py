@@ -86,7 +86,7 @@ def main():
         torch.save({
             'model_state_dict': unet.state_dict(),
             'optim_state_dict': optimizer.state_dict(),
-            'epoch': e,
+            'epoch': e+1,
             'loss_values': LOSS_VALS
         }, MODEL_PATH)
         print("Epoch completed and model successfully saved!")
