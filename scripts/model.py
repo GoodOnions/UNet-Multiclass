@@ -5,6 +5,7 @@ from torchvision import transforms
 from utils import get_supermario_data, decode_segmap
 
 
+
 class UNET(nn.Module):
     """
     Since the original UNET paper was designed for medical image segmentation, we need to adapt it to our problem.
@@ -80,40 +81,5 @@ class UNET(nn.Module):
         
         return x
 
-    def predict(self, frame):
-
-        img = transforms.ToTensor()(frame).to(self.device)
-        img = img.unsqueeze(0)
-        prediction = self.forward(img)
-        prediction = torch.nn.functional.softmax(prediction, dim=1)
-        prediction = torch.argmax(prediction, dim=1).squeeze()
-        prediction = prediction.float().detach().cpu().numpy()
-        segm_rgb = decode_segmap(prediction)
-        return segm_rgb
-
 ROOT_DIR = '../datasets/superMario'
 
-
-'''
-Note:
-For visuailzation of the model, you need to install torchviz and graphviz
-
-brew install graphviz
-pip install torchviz
-'''
-if __name__ == '__main__':
-    u = UNET(in_channels=3, classes=6)
-
-
-    # Visualizaion of the model
-    val_set = get_supermario_data(
-        split='val',
-        root_dir=ROOT_DIR,
-        batch_size=1,
-    )
-    batch = next(iter(val_set))
-    yhat = u(batch[0])
-
-    from torchviz import make_dot
-
-    make_dot(yhat, params=dict(list(u.named_parameters()))).render("../models/model_graph", format="png")
