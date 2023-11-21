@@ -1,12 +1,24 @@
 import torch 
 import torch.nn as nn
-import torchvision.transforms.functional as TF 
+import torchvision.transforms.functional as TF
+from utils import get_supermario_data
+
 
 class UNET(nn.Module):
+    """
+    Since the original UNET paper was designed for medical image segmentation, we need to adapt it to our problem.
+    We will use the same architecture but we will change the number of input channels and output classes.
+    we also reduce the number of layers to reduce the computational cost and model complexity.
+    From the original paper:
+        layers = [in_channels, 64, 128, 256, 512, 1024]
+    We will use:
+        layers = [in_channels, 32, 64, 128, 256, 512]
+    """
     
-    def __init__(self, in_channels=3, classes=1):
+    def __init__(self, in_channels=3, classes=1, layers=[32, 64, 128, 256, 512]):
         super(UNET, self).__init__()
-        self.layers = [in_channels, 64, 128, 256, 512, 1024]
+        layers.insert(0, in_channels)
+        self.layers = layers
         
         self.double_conv_downs = nn.ModuleList(
             [self.__double_conv(layer, layer_n) for layer, layer_n in zip(self.layers[:-1], self.layers[1:])])
@@ -14,13 +26,19 @@ class UNET(nn.Module):
         self.up_trans = nn.ModuleList(
             [nn.ConvTranspose2d(layer, layer_n, kernel_size=2, stride=2)
              for layer, layer_n in zip(self.layers[::-1][:-2], self.layers[::-1][1:-1])])
+
+        for layer, layer_n in zip(self.layers[::-1][:-2], self.layers[::-1][1:-1]):
+            print("Down",layer, layer_n)
             
         self.double_conv_ups = nn.ModuleList(
         [self.__double_conv(layer, layer//2) for layer in self.layers[::-1][:-2]])
+
+        for layer in self.layers[::-1][:-2]:
+            print("Up", layer)
         
         self.max_pool_2x2 = nn.MaxPool2d(kernel_size=2, stride=2)
         
-        self.final_conv = nn.Conv2d(64, classes, kernel_size=1)
+        self.final_conv = nn.Conv2d(self.layers[1], classes, kernel_size=1)
 
         
     def __double_conv(self, in_channels, out_channels):
@@ -53,7 +71,37 @@ class UNET(nn.Module):
             
             concatenated = torch.cat((concat_layer, x), dim=1)
             x = double_conv_up(concatenated)
+
+            # Stop here for a middle result
+            #
             
         x = self.final_conv(x)
         
         return x 
+
+ROOT_DIR = '../datasets/superMario'
+
+
+'''
+Note:
+For visuailzation of the model, you need to install torchviz and graphviz
+
+brew install graphviz
+pip install torchviz
+'''
+if __name__ == '__main__':
+    u = UNET(in_channels=3, classes=6)
+
+
+    # Visualizaion of the model
+    val_set = get_supermario_data(
+        split='val',
+        root_dir=ROOT_DIR,
+        batch_size=1,
+    )
+    batch = next(iter(val_set))
+    yhat = u(batch[0])
+
+    from torchviz import make_dot
+
+    make_dot(yhat, params=dict(list(u.named_parameters()))).render("../models/model_graph", format="png")

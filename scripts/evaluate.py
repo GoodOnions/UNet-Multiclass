@@ -20,7 +20,7 @@ ROOT_DIR = '../datasets/superMario'
 IMG_HEIGHT = 240
 IMG_WIDTH = 272
 
-MODEL_PATH = "../models/dummy_train.pth"
+MODEL_PATH = "../models/e20_b32_train.pth"
 
 EVAL = True
 PLOT_LOSS = True
@@ -72,14 +72,15 @@ def evaluate(path):
     print('Data has been loaded!')
 
     net = UNET(in_channels=3, classes=6).to(DEVICE)
-    checkpoint = torch.load(path)
+    map_location = torch.device(DEVICE)
+    checkpoint = torch.load(path,map_location=map_location)
     net.load_state_dict(checkpoint['model_state_dict'])
     net.eval()
     print(f'{path} has been loaded and initialized')
     save_predictions(val_set, net)
 
 def plot_losses(path):
-    checkpoint = torch.load(path)
+    checkpoint = torch.load(path,map_location=torch.device(DEVICE))
     losses = checkpoint['loss_values']
     epoch = checkpoint['epoch']
     epoch_list = list(range(epoch))

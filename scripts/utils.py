@@ -30,7 +30,8 @@ def save_as_images(tensor_pred, folder, image_name):
     tensor_pred = transforms.ToPILImage()(tensor_pred.byte())
     filename = f"{folder}/{image_name}.png"
     tensor_pred.save(filename)
-        
+
+#Montalvo mio padre
 def decode_segmap(image, nc=21):
     ## Color palette for visualization of the 21 classes
     label_colors = np.array([(0, 0, 0),  # 0=background

@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import utils
+from  tdqm import tdqm
 import matplotlib.pyplot as plt
 from utils import get_supermario_data, decode_segmap
 from model import UNET
@@ -17,9 +18,16 @@ else:
     DEVICE = "cpu"
     print('Running on the CPU')
 
+# Dataset settings
 ROOT_DIR = '../datasets/superMario'
 IMG_HEIGHT = 240
 IMG_WIDTH = 272
+
+# Model
+path = '../models/e20_b32_train.pth'
+IN_CHANNELS = 3
+CLASSES = 6
+
 
 test_set = get_supermario_data(
         split='train',
@@ -28,13 +36,11 @@ test_set = get_supermario_data(
         batch_size=1,
     )
 
-path = '../models/dummy_train.pth'
-
-net = UNET(in_channels=3, classes=6).to(DEVICE)
-checkpoint = torch.load(path)
+net = UNET(in_channels=IN_CHANNELS, classes=CLASSES).to(DEVICE)
+checkpoint = torch.load(path, map_location=DEVICE)
 net.load_state_dict(checkpoint['model_state_dict'])
 
-#Get random semple from the dataset
+# Get random sample from the dataset
 sample = next(iter(test_set))
 
 prediction = net(sample[0].to(DEVICE))
