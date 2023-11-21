@@ -34,7 +34,7 @@ LOAD_MODEL = False
 
 def train_function (data, model, optimizer, loss_fn, device):
     print('Entering into train function')
-    loss_values = []
+
     data = tqdm(data)
     for index, batch in enumerate(data): 
         X, y = batch
@@ -46,12 +46,11 @@ def train_function (data, model, optimizer, loss_fn, device):
         loss.backward()
         optimizer.step()
         data.set_postfix(**{'loss (batch)': loss.item()})
-        loss_values.append(loss.item())
 
-    avg_loss = sum(loss_values)/len(loss_values)
-    return avg_loss
+    return loss.item()
 
 def validation_function (data, model, loss_fn, device):
+
     loss_values = []
     data = tqdm(data)
     for index, batch in enumerate(data):
@@ -123,7 +122,7 @@ def main():
             val_loss = validation_function(val_set, unet, loss_function, DEVICE)
             LOSS_ON_VAL.append(val_loss)
 
-        print(f'Training avg Loss: {loss_val}')
+        print(f'Training last batch Loss: {loss_val}')
         print(f'Validation avg Loss: {val_loss}')
 
         # Saving the model after every epoch

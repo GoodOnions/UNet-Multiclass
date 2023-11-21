@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 import utils
-from  tdqm import tdqm
 import matplotlib.pyplot as plt
 from utils import get_supermario_data, decode_segmap
 from model import UNET
@@ -24,13 +23,13 @@ IMG_HEIGHT = 240
 IMG_WIDTH = 272
 
 # Model
-path = '../models/e20_b32_train.pth'
+path = '../models/e40_b32_unet.pth'
 IN_CHANNELS = 3
 CLASSES = 6
 
 
 test_set = get_supermario_data(
-        split='train',
+        split='test',
         root_dir=ROOT_DIR,
         transforms=None,
         batch_size=1,

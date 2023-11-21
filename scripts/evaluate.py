@@ -20,7 +20,7 @@ ROOT_DIR = '../datasets/superMario'
 IMG_HEIGHT = 240
 IMG_WIDTH = 272
 
-MODEL_PATH = "../models/e20_b32_train.pth"
+MODEL_PATH = "../models/e40_b32_unet.pth"
 
 EVAL = True
 PLOT_LOSS = True
@@ -34,25 +34,8 @@ def save_predictions(data, model):
             X, y = X.to(DEVICE), y.to(DEVICE)
             prediction = model(X)
 
-            '''
-            predictions = torch.nn.functional.softmax(predictions, dim=1)
-            pred_labels = torch.argmax(predictions, dim=1) 
-            pred_labels = pred_labels.float()
-
-            # Remapping the labels
-            pred_labels = pred_labels.to('cpu')
-            #pred_labels.apply_(lambda x: t2l[x].id)
-            )
-            pred_labels = pred_labels.to(DEVICE)
-
-            # Resizing predicted images too original size
-            #pred_labels = transforms.Resize((1024, 2048))(pred_labels)
-            utils.save_as_images(pred_labels, '../predictions',str(idx), multiclass=True)
-            '''
             prediction = torch.argmax(prediction, dim=1).squeeze()
             prediction = prediction.float().detach().cpu().numpy()
-            segm_rgb = decode_segmap(prediction)
-            #plt.savefig('../predictions/test.png', format='png', dpi=300, bbox_inches="tight")
 
 
 
@@ -81,14 +64,17 @@ def evaluate(path):
 
 def plot_losses(path):
     checkpoint = torch.load(path,map_location=torch.device(DEVICE))
-    losses = checkpoint['loss_values']
+    losses_train = checkpoint['loss_values']
+    loss_on_val = checkpoint['loss_on_val']
     epoch = checkpoint['epoch']
     epoch_list = list(range(epoch))
 
-    plt.plot(epoch_list, losses)
+    plt.plot(epoch_list, losses_train, label='Training loss')
+    plt.plot(epoch_list, loss_on_val, label='Validation loss')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.title(f"Loss over {epoch+1} epoch/s")
+    plt.legend()
     plt.show()
 
 if __name__ == '__main__':

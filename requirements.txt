@@ -4,3 +4,4 @@ numpy
 tdqm
 matplotlib
 torchviz
+pandas
