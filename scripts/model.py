@@ -1,7 +1,8 @@
 import torch 
 import torch.nn as nn
 import torchvision.transforms.functional as TF
-from utils import get_supermario_data
+from torchvision import transforms
+from utils import get_supermario_data, decode_segmap
 
 
 class UNET(nn.Module):
@@ -77,7 +78,18 @@ class UNET(nn.Module):
             
         x = self.final_conv(x)
         
-        return x 
+        return x
+
+    def predict(self, frame):
+
+        img = transforms.ToTensor()(frame).to(self.device)
+        img = img.unsqueeze(0)
+        prediction = self.forward(img)
+        prediction = torch.nn.functional.softmax(prediction, dim=1)
+        prediction = torch.argmax(prediction, dim=1).squeeze()
+        prediction = prediction.float().detach().cpu().numpy()
+        segm_rgb = decode_segmap(prediction)
+        return segm_rgb
 
 ROOT_DIR = '../datasets/superMario'
 
