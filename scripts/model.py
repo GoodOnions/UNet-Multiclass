@@ -1,7 +1,7 @@
 import torch 
 import torch.nn as nn
 import torchvision.transforms.functional as TF
-from utils import get_supermario_data
+
 
 
 class UNET(nn.Module):
@@ -77,31 +77,6 @@ class UNET(nn.Module):
             
         x = self.final_conv(x)
         
-        return x 
-
-ROOT_DIR = '../datasets/superMario'
+        return x
 
 
-'''
-Note:
-For visuailzation of the model, you need to install torchviz and graphviz
-
-brew install graphviz
-pip install torchviz
-'''
-if __name__ == '__main__':
-    u = UNET(in_channels=3, classes=6)
-
-
-    # Visualizaion of the model
-    val_set = get_supermario_data(
-        split='val',
-        root_dir=ROOT_DIR,
-        batch_size=1,
-    )
-    batch = next(iter(val_set))
-    yhat = u(batch[0])
-
-    from torchviz import make_dot
-
-    make_dot(yhat, params=dict(list(u.named_parameters()))).render("../models/model_graph", format="png")

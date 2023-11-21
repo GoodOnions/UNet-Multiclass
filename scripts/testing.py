@@ -6,7 +6,6 @@ from utils import get_supermario_data, decode_segmap
 from model import UNET
 
 
-
 if torch.cuda.is_available():
     DEVICE = 'cuda:0'
     print('Running on the GPU')
