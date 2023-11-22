@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torchvision.transforms.functional as TF
 from torchvision import transforms
-from utils import get_supermario_data, decode_segmap
+from UNet_Multiclass.scripts.utils import get_supermario_data, decode_segmap
 
 
 
@@ -83,7 +83,7 @@ class UNET(nn.Module):
 
     def predict(self, frame):
 
-        img = transforms.ToTensor()(frame).to(self.device)
+        img = transforms.ToTensor()(frame)
         img = img.unsqueeze(0)
         prediction = self.forward(img)
         prediction = torch.nn.functional.softmax(prediction, dim=1)

@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets, utils, transforms
-from datasets import SuperMarioDataset
+from UNet_Multiclass.scripts.datasets import SuperMarioDataset
 from PIL import Image
 from tqdm import tqdm
 import numpy as np
