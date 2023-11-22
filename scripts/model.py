@@ -17,7 +17,7 @@ class UNET(nn.Module):
         layers = [in_channels, 32, 64, 128, 256, 512]
     """
     
-    def __init__(self, in_channels=3, classes=1, layers=[32, 64, 128, 256, 512]):
+    def __init__(self, in_channels=3, classes=1, layers=[64, 128, 256, 512, 1024]):
         super(UNET, self).__init__()
         layers.insert(0, in_channels)
         self.layers = layers

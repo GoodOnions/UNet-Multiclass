@@ -75,6 +75,7 @@ def main():
     
     transform = transforms.Compose([
         transforms.Resize((IMG_HEIGHT, IMG_WIDTH), interpolation=Image.NEAREST),
+        transforms.RandomHorizontalFlip(p=0.5),
     ]) 
 
     train_set = get_supermario_data(
