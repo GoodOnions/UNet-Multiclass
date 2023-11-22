@@ -81,5 +81,16 @@ class UNET(nn.Module):
         
         return x
 
-ROOT_DIR = '../datasets/superMario'
+    def predict(self, frame):
+
+        img = transforms.ToTensor()(frame).to(self.device)
+        img = img.unsqueeze(0)
+        prediction = self.forward(img)
+        prediction = torch.nn.functional.softmax(prediction, dim=1)
+        prediction = torch.argmax(prediction, dim=1).squeeze()
+        prediction = prediction.float().detach().cpu().numpy()
+        segm_rgb = decode_segmap(prediction)
+        return segm_rgb
+
+
 
