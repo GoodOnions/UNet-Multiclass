@@ -3,6 +3,7 @@ import torch
 import utils
 import matplotlib.pyplot as plt
 from utils import get_supermario_data, decode_segmap
+import torchvision.transforms as transforms
 from model import UNET
 import os
 
@@ -48,6 +49,10 @@ prediction = torch.nn.functional.softmax(prediction, dim=1)
 prediction = torch.argmax(prediction, dim=1).squeeze()
 prediction = prediction.float().detach().cpu().numpy()
 segm_rgb = decode_segmap(prediction)
+
+# from tensor to img
+img = transforms.ToPILImage()(sample[0].squeeze().cpu())
+segm_rgb = net.predict(img)
 plt.imshow(segm_rgb)
 plt.axis('off')
 plt.savefig('../predictions/test.png', format='png',dpi=300,bbox_inches = "tight")
