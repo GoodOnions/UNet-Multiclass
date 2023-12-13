@@ -64,7 +64,17 @@ def validation_function (data, model, loss_fn, device):
 
     avg_loss = sum(loss_values)/len(loss_values)
     return avg_loss
-        
+class loss_class(nn.CrossEntropyLoss):
+    def __init__(self):
+        super(loss_class, self).__init__()
+
+    def forward(self, input, target):
+        shape = input.shape
+        sum = 0
+        for i in range(shape[1]):
+            sum+=super(loss_class, self).forward(input[:,i,:,:].squeeze(), target[:,i,:,:].squeeze())
+
+        return sum/shape[1]
 
 def main():
     global epoch
@@ -97,7 +107,8 @@ def main():
     # Defining the model, optimizer and loss function
     unet = UNET(in_channels=IN_CHANNELS, classes=CLASSES).to(DEVICE).train()
     optimizer = optim.Adam(unet.parameters(), lr=LEARNING_RATE)
-    loss_function = nn.CrossEntropyLoss(ignore_index=255) 
+    #loss_function = nn.CrossEntropyLoss(ignore_index=255)
+    loss_function = loss_class()
 
     # Loading a previous stored model from MODEL_PATH variable
     if LOAD_MODEL == True:

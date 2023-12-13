@@ -4,7 +4,9 @@ import utils
 import matplotlib.pyplot as plt
 from utils import get_supermario_data, decode_segmap
 from model import UNET
+import os
 
+os.chdir('/Users/daniele/KTH-Projects/Semantic-Segmentation-for-Deep-Reinforcement-Learning/UNet_Multiclass/scripts')
 
 if torch.cuda.is_available():
     DEVICE = 'cuda:0'
@@ -22,8 +24,8 @@ IMG_HEIGHT = 240
 IMG_WIDTH = 272
 
 # Model
-path = '../models/e40_b32_unet.pth'
-IN_CHANNELS = 3
+path = '../models/e60_b32_grey_unet_super.pth'
+IN_CHANNELS = 1
 CLASSES = 6
 
 

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torchvision.transforms.functional as TF
 from torchvision import transforms
+from PIL import Image
 from UNet_Multiclass.scripts.utils import get_supermario_data, decode_segmap
 
 
@@ -17,7 +18,7 @@ class UNET(nn.Module):
         layers = [in_channels, 32, 64, 128, 256, 512]
     """
     
-    def __init__(self, in_channels=3, classes=1, layers=[32, 64, 128, 256, 512]):
+    def __init__(self, model_path, in_channels=3, classes=1, layers=[64, 128, 256, 512, 1024], device='cpu'):
         super(UNET, self).__init__()
         layers.insert(0, in_channels)
         self.layers = layers
@@ -42,6 +43,9 @@ class UNET(nn.Module):
         
         self.final_conv = nn.Conv2d(self.layers[1], classes, kernel_size=1)
 
+        checkpoint = torch.load(model_path, map_location=device)
+        self.load_state_dict(checkpoint['model_state_dict'])
+
         
     def __double_conv(self, in_channels, out_channels):
         conv = nn.Sequential(
@@ -53,7 +57,7 @@ class UNET(nn.Module):
         )
         return conv
     
-    def forward(self, x):
+    def forward(self, x, layer=None):
         # down layers
         concat_layers = []
         
@@ -66,7 +70,8 @@ class UNET(nn.Module):
         concat_layers = concat_layers[::-1]
         
         # up layers
-        for up_trans, double_conv_up, concat_layer  in zip(self.up_trans, self.double_conv_ups, concat_layers):
+        counter = 0
+        for up_trans, double_conv_up, concat_layer in zip(self.up_trans, self.double_conv_ups, concat_layers):
             x = up_trans(x)
             if x.shape != concat_layer.shape:
                 x = TF.resize(x, concat_layer.shape[2:])
@@ -75,17 +80,21 @@ class UNET(nn.Module):
             x = double_conv_up(concatenated)
 
             # Stop here for a middle result
-            #
+            counter += 1
+            if counter == layer:
+                print(x.shape)
+                return x
             
         x = self.final_conv(x)
         
         return x
 
-    def predict(self, frame):
+    def predict(self, frame, layer=None):
 
         img = transforms.ToTensor()(frame)
         img = img.unsqueeze(0)
-        prediction = self.forward(img)
+        prediction = self.forward(img, layer=layer)
+
         prediction = torch.nn.functional.softmax(prediction, dim=1)
         prediction = torch.argmax(prediction, dim=1).squeeze()
         prediction = prediction.float().detach().cpu().numpy()
