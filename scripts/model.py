@@ -3,7 +3,7 @@ import torch.nn as nn
 import torchvision.transforms.functional as TF
 from torchvision import transforms
 from PIL import Image
-from UNet_Multiclass.scripts.utils import get_supermario_data, decode_segmap
+from UNet_Multiclass.scripts.utils import get_supermario_data, decode_segmap, decode_layer
 
 
 
@@ -82,14 +82,13 @@ class UNET(nn.Module):
             # Stop here for a middle result
             counter += 1
             if counter == layer:
-                print(x.shape)
                 return x
             
         x = self.final_conv(x)
         
         return x
 
-    def predict(self, frame, layer=None):
+    def predict(self, frame, layer=None, colors=None):
 
         img = transforms.ToTensor()(frame)
         img = img.unsqueeze(0)
@@ -100,6 +99,5 @@ class UNET(nn.Module):
         prediction = prediction.float().detach().cpu().numpy()
         segm_rgb = decode_segmap(prediction)
         return segm_rgb
-
 
 
